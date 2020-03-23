@@ -7,9 +7,13 @@
 //
 
 import Foundation
+import CloudKit
 
 public struct Plant: Equatable {
-    let name: String
+    public let name: String
+    public init(name: String) {
+        self.name = name
+    }
 }
 
 extension Array where Element == Plant {
@@ -21,5 +25,13 @@ extension Array where Element == Plant {
         ]
 
         return plants.map(Plant.init(name:))
+    }
+}
+
+extension Plant {
+    public init?(record: CKRecord) {
+        guard record.recordType == "Plant",
+        let name = record["name"] as? String else { return nil }
+        self.name = name
     }
 }

@@ -11,20 +11,28 @@ import SwiftUI
 import CasePaths
 import ComposableArchitecture
 import Plants
+import Models
+import PlantDetails
 
 struct AppState: Equatable {
-    var plants = [Plant].mock
+    var plants = [Plant]()
+    var isPlantDetailsPresented = false
+    var plantDetails = NewPlant()
 }
 
 extension AppState {
     var plantsView: Plants.State {
         get {
             .init(
-                plants: plants
+                plants: plants,
+                isPlantDetailsPresented: isPlantDetailsPresented,
+                plantDetails: plantDetails
             )
         }
         set {
             self.plants = newValue.plants
+            self.isPlantDetailsPresented = newValue.isPlantDetailsPresented
+            self.plantDetails = newValue.plantDetails
         }
     }
 }
@@ -34,6 +42,15 @@ enum AppAction: Equatable {
 }
 
 struct ContentView: View {
+    init(
+        store: Store<AppState, AppAction> = .init(
+            initialValue: AppState(),
+            reducer: logging(reducer),
+            environment: AppEnvironment()
+        )
+    ) {
+        self.store = store
+    }
 
     @ObservedObject var store: Store<AppState, AppAction>
 
@@ -49,11 +66,12 @@ struct ContentView: View {
     }
 }
 
-//struct ContentView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ContentView()
-//    }
-//}
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
+
 struct AppEnvironment {}
 
 extension AppEnvironment {
