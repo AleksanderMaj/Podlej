@@ -55,13 +55,19 @@ struct ContentView: View {
     @ObservedObject var store: Store<AppState, AppAction>
 
     var body: some View {
-        NavigationView {
-            PlantsView(
-                store: self.store.view(
-                    value: { $0.plantsView },
-                    action: { AppAction.plants($0) }
+        TabView {
+            NavigationView {
+                PlantsView(
+                    store: self.store.view(
+                        value: { $0.plantsView },
+                        action: { AppAction.plants($0) }
+                    )
                 )
-            )
+            }
+            .tabItem {
+                Image(systemName: "list.bullet")
+                Text("Rośliny")
+            }
         }
     }
 }

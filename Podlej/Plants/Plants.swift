@@ -124,8 +124,8 @@ public struct PlantsView: View {
                 content: { plant in Text(plant.name) }
             )
         }
-        .navigationBarTitle("Plants")
-        .navigationBarItems(trailing: Button("Add", action: {
+        .navigationBarTitle("Rośliny")
+        .navigationBarItems(trailing: Button("Dodaj", action: {
             self.store.send(.list(.addPlant))
         }))
         .onAppear {

@@ -87,14 +87,14 @@ public struct PlantDetailsView: View {
         return NavigationView {
             Form {
                 Section {
-                    TextField("Name", text: nameBinding)
-                    TextField("Species", text: speciesBinding)
+                    TextField("Nazwa", text: nameBinding)
+                    TextField("Gatunek", text: speciesBinding)
                 }
                 Section {
-                    Button("Create", action: { self.store.send(.create) })
+                    Button("Gotowe", action: { self.store.send(.create) })
                 }
             }
-            .navigationBarTitle("Add new plant")
+            .navigationBarTitle("Dodaj roślinę")
         }
     }
 }
