@@ -11,13 +11,14 @@ import ComposableArchitecture
 import CloudKit
 import Combine
 import Models
+import PodlejCommon
 
 public struct State: Equatable {
-    public var plant: NewPlant
+    public var plant: Plant
     public var isPresented: Bool
 
     public init(
-        plant: NewPlant,
+        plant: Plant,
         isPresented: Bool
     ) {
         self.plant = plant
@@ -30,99 +31,97 @@ public enum Action: Equatable {
     case create
     case nameChanged(String)
     case speciesChanged(String)
-    case addSuccess
-    case addFailure
+    case createPlantResponse(Result<Plant, CloudKitWrapper.CreateError>)
 }
 
 public struct Environment {
-    public init() {}
+    var createPlant: (Plant) -> Future<Plant, CloudKitWrapper.CreateError>
+    public init(
+        createPlant: @escaping (Plant) -> Future<Plant, CloudKitWrapper.CreateError>
+    ) {
+        self.createPlant = createPlant
+    }
 }
 
-public let reducer: Reducer<State, Action, Environment> = {state, action, _ in
+public let reducer = Reducer<State, Action, Environment> { state, action, environment in
     switch action {
-    case .start:
-        state.plant = NewPlant()
-        return []
-    case .nameChanged(let name):
-        state.plant.name = name
-        return []
-    case .speciesChanged(let species):
-        return []
-    case .create:
-        return [add(plant: state.plant)]
-    case .addSuccess:
-        state.isPresented = false
-        return []
-    case .addFailure:
-        return []
+        case .start:
+            state.plant = Plant(name: "Nowa roślina")
+            return .none
+
+        case .nameChanged(let name):
+            state.plant.name = name
+            return .none
+
+        case .speciesChanged(let species):
+            state.plant.species = species
+            return .none
+
+        case .create:
+            return environment.createPlant(state.plant)
+                .receive(on: DispatchQueue.main)
+                .catchToEffect()
+                .map(Action.createPlantResponse)
+
+        case .createPlantResponse(.success(let plant)):
+            state.isPresented = false
+            state.plant = Plant(name: "Nowa roślina")
+            return .none
+
+        case .createPlantResponse(.failure(let error)):
+            return .none
     }
 }
 
 public struct PlantDetailsView: View {
 
-    @ObservedObject var store: Store<State, Action>
-    @SwiftUI.State private var name = ""
-    @SwiftUI.State private var species = ""
+    let store: Store<State, Action>
 
     public init(store: Store<State, Action>) {
         self.store = store
     }
 
     public var body: some View {
-        let nameBinding = Binding<String>(
-            get: { self.name },
-            set: {
-                self.name = $0
-                self.store.send(.nameChanged($0))
-            }
-        )
-
-        let speciesBinding = Binding<String>(
-            get: { self.species },
-            set: {
-                self.species = $0
-                self.store.send(.speciesChanged($0))
-            }
-        )
         return NavigationView {
-            Form {
-                Section {
-                    TextField("Nazwa", text: nameBinding)
-                    TextField("Gatunek", text: speciesBinding)
+            WithViewStore(self.store) { viewStore in
+                Form {
+                    Section {
+                        TextField(
+                            "Nazwa",
+                            text: viewStore.binding(
+                                get: { $0.plant.name },
+                                send: Action.nameChanged
+                            )
+                        )
+                        TextField(
+                            "Gatunek",
+                            text: viewStore.binding(
+                                get: { $0.plant.species ?? ""},
+                                send: Action.speciesChanged
+                            )
+                        )
+                    }
+                    Section {
+                        Button("Gotowe", action: { viewStore.send(.create) })
+                    }
                 }
-                Section {
-                    Button("Gotowe", action: { self.store.send(.create) })
-                }
+                .navigationBarTitle("Dodaj roślinę")
             }
-            .navigationBarTitle("Dodaj roślinę")
         }
     }
 }
 
-private func add(plant: NewPlant) -> Effect<Action> {
-    Deferred {
-        Future<Action, Never> { callback in
-            let plantRecordID = CKRecord.ID(recordName: plant.name)
-            let plantRecord = CKRecord(recordType: "Plant", recordID: plantRecordID)
-            plantRecord["name"] = plant.name
-
-            let container = CKContainer.init(identifier: "iCloud.com.aleksandermaj.podlej-test")
-            let db = container.privateCloudDatabase
-
-            db.save(plantRecord) { (record, error) in
-                if let error = error {
-                    print(error)
-                    callback(.success(Action.addFailure))
-                } else if let record = record {
-                    print(record)
-                    callback(.success(Action.addSuccess))
-                } else {
-                    fatalError()
-                }
-            }
-
-        }
+struct PlantDetailsView_Previews: PreviewProvider {
+    static var previews: some View {
+        PlantDetailsView(
+            store: .init(
+                initialState: .init(
+                    plant: .init(name: "Nowa roślina"),
+                    isPresented: true
+                ),
+                reducer: reducer,
+                environment: .init(createPlant: CloudKitWrapper.mock.createPlant)
+            )
+        )
     }
-    .receive(on: DispatchQueue.main)
-    .eraseToEffect()
 }

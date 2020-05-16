@@ -10,28 +10,56 @@ import Foundation
 import CloudKit
 
 public struct Plant: Equatable {
-    public let name: String
-    public init(name: String) {
+    public var uuid: UUID
+    public var name: String
+    public var species: String?
+//
+    public init(
+        uuid: UUID = UUID(),
+        name: String,
+        species: String? = nil
+    ) {
+        self.uuid = uuid
         self.name = name
+        self.species = species
     }
 }
 
 extension Array where Element == Plant {
     public static var mock: [Plant] {
-        let plants = [
-            "Monstera Adansonii #1",
-            "Sansevieria #1",
-            "Monstera Adansonii #2"
+        [
+            Plant(
+                name: "Grażyna",
+                species: "Monstera Adansonii"
+            ),
+            Plant(
+                name: "Dziad"
+            ),
+            Plant(
+                name: "Sansevieria",
+                species: "Sansevieria"
+            )
         ]
-
-        return plants.map(Plant.init(name:))
     }
 }
 
 extension Plant {
     public init?(record: CKRecord) {
         guard record.recordType == "Plant",
-        let name = record["name"] as? String else { return nil }
+            let uuid = UUID(uuidString: record.recordID.recordName),
+            let name = record["name"] as? String
+            else { return nil }
+
+        self.uuid = uuid
         self.name = name
+        self.species = record["species"] as? String
+    }
+
+    public var ckRecord: CKRecord {
+        let recordID = CKRecord.ID(recordName: self.uuid.uuidString)
+        let record = CKRecord(recordType: "Plant", recordID: recordID)
+        record["name"] = name
+        record["species"] = species
+        return record
     }
 }

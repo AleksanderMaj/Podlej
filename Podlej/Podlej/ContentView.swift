@@ -13,11 +13,12 @@ import ComposableArchitecture
 import Plants
 import Models
 import PlantDetails
+import PodlejCommon
 
 struct AppState: Equatable {
     var plants = [Plant]()
     var isPlantDetailsPresented = false
-    var plantDetails = NewPlant()
+    var plantDetails = Plant(name: "Nowa roślina")
 }
 
 extension AppState {
@@ -44,29 +45,40 @@ enum AppAction: Equatable {
 struct ContentView: View {
     init(
         store: Store<AppState, AppAction> = .init(
-            initialValue: AppState(),
-            reducer: logging(reducer),
+            initialState: AppState(),
+            reducer: reducer.debug(),
             environment: AppEnvironment()
         )
     ) {
         self.store = store
     }
 
-    @ObservedObject var store: Store<AppState, AppAction>
+    let store: Store<AppState, AppAction>
 
     var body: some View {
         TabView {
-            NavigationView {
-                PlantsView(
-                    store: self.store.view(
-                        value: { $0.plantsView },
-                        action: { AppAction.plants($0) }
-                    )
+            PlantsView(
+                store: self.store.scope(
+                    state: { $0.plantsView },
+                    action: AppAction.plants
                 )
+            )
+                .tabItem {
+                    Image(systemName: "list.bullet")
+                        .font(Font.body.weight(.black))
+                    Text("Rośliny")
             }
-            .tabItem {
-                Image(systemName: "list.bullet")
-                Text("Rośliny")
+            Text("Kalendarz")
+                .tabItem {
+                    Image(systemName: "calendar")
+                        .font(Font.body.weight(.black))
+                    Text("Kalendarz")
+            }
+            Text("Ustawienia")
+                .tabItem {
+                    Image(systemName: "gear")
+                        .font(Font.body.weight(.black))
+                    Text("Ustawienia")
             }
         }
     }
@@ -78,15 +90,19 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-struct AppEnvironment {}
+struct AppEnvironment {
+    var cloudKitWrapper = CloudKitWrapper()
+}
 
 extension AppEnvironment {
     var plants: Plants.Environment {
-        .init()
+        .init(cloudKitWrapper: cloudKitWrapper)
     }
 }
 
-let reducer: Reducer<AppState, AppAction, AppEnvironment> = combine(
-    pullback(Plants.reducer, value: \AppState.plantsView, action: /AppAction.plants, environment: { $0.plants })
+let reducer: Reducer<AppState, AppAction, AppEnvironment> = Plants.reducer.pullback(
+    state: \AppState.plantsView,
+    action: /AppAction.plants,
+    environment: \AppEnvironment.plants
 )
 

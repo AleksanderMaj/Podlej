@@ -13,16 +13,17 @@ import Combine
 import Models
 import PlantDetails
 import CasePaths
+import PodlejCommon
 
 public struct State: Equatable {
     public var plants: [Plant]
     public var isPlantDetailsPresented: Bool
-    public var plantDetails: NewPlant
+    public var plantDetails: Plant
 
     public init(
         plants: [Plant],
         isPlantDetailsPresented: Bool,
-        plantDetails: NewPlant
+        plantDetails: Plant
     ) {
         self.plants = plants
         self.isPlantDetailsPresented = isPlantDetailsPresented
@@ -46,7 +47,7 @@ extension State {
 
     var plantDetailsView: PlantDetails.State {
         get {
-            .init(
+            PlantDetails.State(
                 plant: plantDetails,
                 isPresented: isPlantDetailsPresented
             )
@@ -69,105 +70,132 @@ public enum Action: Equatable {
 }
 
 public struct Environment {
-    public init() {}
+    var cloudKitWrapper: CloudKitWrapper
+
+    public init(
+        cloudKitWrapper: CloudKitWrapper
+    ) {
+        self.cloudKitWrapper = cloudKitWrapper
+    }
+
+    var plantDetails: PlantDetails.Environment {
+        .init(createPlant: cloudKitWrapper.createPlant)
+    }
+}
+
+public extension Environment {
+    static var mock: Environment {
+        Environment(cloudKitWrapper: CloudKitWrapper.mock)
+    }
 }
 
 public enum ListAction: Equatable {
     case addPlant
     case plantDetailsDismissed
     case fetchPlants
-    case fetchPlantsSuccess([Plant])
-    case fetchPlantsError
+    case fetchPlantsResponse(Result<[Plant], CloudKitWrapper.FetchError>)
     case plantDetails(PlantDetails.Action)
 }
 
-
-let listReducer: Reducer<ListState, ListAction, Environment> = { state, action, _ in
+let listReducer = Reducer<ListState, ListAction, Environment> { state, action, environment in
     switch action {
     case .addPlant:
         state.isPlantDetailsPresented = true
-        return []
+        return .none
+
     case .plantDetailsDismissed:
         state.isPlantDetailsPresented = false
-        return [fetchPlants()]
+        return .none
+
     case .fetchPlants:
-        return [fetchPlants()]
-    case .fetchPlantsSuccess(let plants):
+        return environment.cloudKitWrapper.fetchPlants()
+            .receive(on: DispatchQueue.main)
+            .catchToEffect()
+            .map(ListAction.fetchPlantsResponse)
+
+    case .fetchPlantsResponse(.success(let plants)):
         state.plants = plants
-        return []
-    case .fetchPlantsError:
-        return []
+        return .none
+
+    case .fetchPlantsResponse(.failure(let error)):
+        return .none
+
     case .plantDetails:
-        return []
+        return .none
     }
 }
 
-public let reducer = combine(
-    pullback(listReducer, value: \State.list, action: /Action.list, environment: { $0 }),
-    pullback(PlantDetails.reducer, value: \State.plantDetailsView, action: /Action.plantDetails, environment: { _ in PlantDetails.Environment() })
+public let reducer = Reducer.combine(
+    listReducer.pullback(state: \State.list, action: /Action.list, environment: { $0 }),
+    PlantDetails.reducer.pullback(
+        state: \State.plantDetailsView,
+        action: /Action.plantDetails,
+        environment: \Environment.plantDetails
+    ),
+    Reducer { state, action, env in
+        switch action {
+        case .plantDetails(.createPlantResponse(.success(let plant))):
+            return Effect(value: Action.list(.fetchPlants))
+        default:
+            return .none
+        }
+    }
 )
 
 
 public struct PlantsView: View {
 
-    @ObservedObject var store: Store<State, Action>
+    let store: Store<State, Action>
 
     public init(store: Store<State, Action>) {
         self.store = store
     }
     
     public var body: some View {
-        List {
-            ForEach(
-                self.store.value.plants,
-                id: \Plant.name,
-                content: { plant in Text(plant.name) }
-            )
-        }
-        .navigationBarTitle("Rośliny")
-        .navigationBarItems(trailing: Button("Dodaj", action: {
-            self.store.send(.list(.addPlant))
-        }))
-        .onAppear {
-            self.store.send(.list(.fetchPlants))
-        }
-        .sheet(
-            isPresented: .constant(self.store.value.isPlantDetailsPresented),
-            onDismiss: { self.store.send(.list(.plantDetailsDismissed)) }
-        ) {
-            PlantDetailsView(
-                store: self.store.view(
-                    value: { $0.plantDetailsView },
-                    action: Action.plantDetails
+        WithViewStore(store) { viewStore in
+            NavigationView {
+                List {
+                    ForEach(
+                        viewStore.plants,
+                        id: \Plant.name,
+                        content: { plant in Text(plant.name) }
+                    )
+                }
+                .navigationBarTitle("Rośliny")
+                .navigationBarItems(trailing:
+                    HStack {
+                        Button("Odśwież", action: { viewStore.send(.list(.fetchPlants)) })
+                        Button("Dodaj", action: { viewStore.send(.list(.addPlant)) })
+                    }
                 )
-            )
-        }
-    }
-}
-
-private func fetchPlants() -> Effect<ListAction> {
-    Deferred {
-        Future<ListAction, Never> { callback in
-            let container = CKContainer(identifier: "iCloud.com.aleksandermaj.podlej-test")
-            let db = container.privateCloudDatabase
-            let query = CKQuery(
-                recordType: CKRecord.RecordType("Plant"),
-                predicate: NSPredicate(value: true)
-            )
-            db.perform(query, inZoneWith: nil) { (records, error) in
-                if let error = error {
-                    print(error)
-                    callback(.success(ListAction.fetchPlantsError))
-                } else if let records = records {
-                    print(records)
-                    let plants = records.compactMap(Plant.init(record:))
-                    callback(.success(ListAction.fetchPlantsSuccess(plants)))
-                } else {
-                    fatalError()
+                    .onAppear {
+                        viewStore.send(.list(.fetchPlants))
+                }
+                .sheet(
+                    isPresented: .constant(viewStore.isPlantDetailsPresented),
+                    onDismiss: { viewStore.send(.list(.plantDetailsDismissed)) }
+                ) {
+                    PlantDetailsView(
+                        store: self.store.scope(state: { $0.plantDetailsView }, action: Action.plantDetails)
+                    )
                 }
             }
         }
     }
-    .receive(on: DispatchQueue.main)
-    .eraseToEffect()
+}
+
+struct Plants_Previews: PreviewProvider {
+    static var previews: some View {
+        PlantsView(
+            store: .init(
+                initialState: .init(
+                    plants: .mock,
+                    isPlantDetailsPresented: false,
+                    plantDetails: .init(name: "Nowa roślina")
+                ),
+                reducer: reducer,
+                environment: .mock
+            )
+        )
+    }
 }
