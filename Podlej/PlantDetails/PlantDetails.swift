@@ -82,46 +82,46 @@ public struct PlantDetailsView: View {
     }
 
     public var body: some View {
-        return NavigationView {
-            WithViewStore(self.store) { viewStore in
-                Form {
-                    Section {
-                        TextField(
-                            "Nazwa",
-                            text: viewStore.binding(
-                                get: { $0.plant.name },
-                                send: Action.nameChanged
-                            )
+        return WithViewStore(self.store) { viewStore in
+            Form {
+                Section {
+                    TextField(
+                        "Nazwa",
+                        text: viewStore.binding(
+                            get: { $0.plant.name },
+                            send: Action.nameChanged
                         )
-                        TextField(
-                            "Gatunek",
-                            text: viewStore.binding(
-                                get: { $0.plant.species ?? ""},
-                                send: Action.speciesChanged
-                            )
+                    )
+                    TextField(
+                        "Gatunek",
+                        text: viewStore.binding(
+                            get: { $0.plant.species ?? ""},
+                            send: Action.speciesChanged
                         )
-                    }
-                    Section {
-                        Button("Gotowe", action: { viewStore.send(.create) })
-                    }
+                    )
                 }
-                .navigationBarTitle("Dodaj roślinę")
+                Section {
+                    Button("Gotowe", action: { viewStore.send(.create) })
+                }
             }
+            .navigationBarTitle("Dodaj roślinę")
         }
     }
 }
 
 struct PlantDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        PlantDetailsView(
-            store: .init(
-                initialState: .init(
-                    plant: .init(name: "Nowa roślina"),
-                    isPresented: true
-                ),
-                reducer: reducer,
-                environment: .init(createPlant: CloudKitWrapper.mock.createPlant)
+        NavigationView {
+            PlantDetailsView(
+                store: .init(
+                    initialState: .init(
+                        plant: .init(name: "Nowa roślina"),
+                        isPresented: true
+                    ),
+                    reducer: reducer,
+                    environment: .init(createPlant: CloudKitWrapper.mock.createPlant)
+                )
             )
-        )
+        }
     }
 }

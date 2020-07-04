@@ -18,17 +18,16 @@
 		7A2174032427846900A0AAD5 /* Plants.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7A2173ED2427846900A0AAD5 /* Plants.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7A21740C242784B700A0AAD5 /* Plants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A21740B242784B700A0AAD5 /* Plants.swift */; };
 		7A21743F2427BD3F00A0AAD5 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A21743E2427BD3F00A0AAD5 /* CloudKit.framework */; };
-		7A2E2C07246F070D000ADF7F /* PodlejCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 7A2E2C05246F070D000ADF7F /* PodlejCommon.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7A2E2C0B246F0742000ADF7F /* PodlejCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A2E2C03246F070D000ADF7F /* PodlejCommon.framework */; };
 		7A2E2C0C246F0742000ADF7F /* PodlejCommon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7A2E2C03246F070D000ADF7F /* PodlejCommon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7A2E2C10246F076B000ADF7F /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7A2E2C0F246F076B000ADF7F /* ComposableArchitecture */; };
 		7A2E2C11246F078F000ADF7F /* PodlejCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A2E2C03246F070D000ADF7F /* PodlejCommon.framework */; };
 		7A2E2C12246F0794000ADF7F /* PodlejCommon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A2E2C03246F070D000ADF7F /* PodlejCommon.framework */; };
+		7A5016862471BF5A0054E705 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A5016842471BF230054E705 /* Preview Assets.xcassets */; };
 		7A984FD723C0AB7800772684 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A984FD623C0AB7800772684 /* AppDelegate.swift */; };
 		7A984FD923C0AB7800772684 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A984FD823C0AB7800772684 /* SceneDelegate.swift */; };
 		7A984FDB23C0AB7800772684 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A984FDA23C0AB7800772684 /* ContentView.swift */; };
 		7A984FDD23C0AB7A00772684 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A984FDC23C0AB7A00772684 /* Assets.xcassets */; };
-		7A984FE023C0AB7A00772684 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A984FDF23C0AB7A00772684 /* Preview Assets.xcassets */; };
 		7A984FE323C0AB7A00772684 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7A984FE123C0AB7A00772684 /* LaunchScreen.storyboard */; };
 		7A984FEE23C0AB7B00772684 /* PodlejTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A984FED23C0AB7B00772684 /* PodlejTests.swift */; };
 		7AA739102439E3270057DE04 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA7390F2439E3270057DE04 /* Location.swift */; };
@@ -179,14 +178,12 @@
 		7A2E2BF2246F0634000ADF7F /* PodlejCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PodlejCommon.h; sourceTree = "<group>"; };
 		7A2E2BF3246F0634000ADF7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7A2E2C03246F070D000ADF7F /* PodlejCommon.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PodlejCommon.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		7A2E2C05246F070D000ADF7F /* PodlejCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PodlejCommon.h; sourceTree = "<group>"; };
-		7A2E2C06246F070D000ADF7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7A5016842471BF230054E705 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		7A984FD323C0AB7700772684 /* Podlej.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Podlej.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A984FD623C0AB7800772684 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7A984FD823C0AB7800772684 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		7A984FDA23C0AB7800772684 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7A984FDC23C0AB7A00772684 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		7A984FDF23C0AB7A00772684 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		7A984FE223C0AB7A00772684 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7A984FE423C0AB7A00772684 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7A984FE923C0AB7B00772684 /* PodlejTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PodlejTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -326,13 +323,12 @@
 			path = PodlejCommon;
 			sourceTree = "<group>";
 		};
-		7A2E2C04246F070D000ADF7F /* PodlejCommon */ = {
+		7A5016832471BEF30054E705 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				7A2E2C05246F070D000ADF7F /* PodlejCommon.h */,
-				7A2E2C06246F070D000ADF7F /* Info.plist */,
+				7A5016842471BF230054E705 /* Preview Assets.xcassets */,
 			);
-			path = PodlejCommon;
+			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		7A984FCA23C0AB7700772684 = {
@@ -347,7 +343,6 @@
 				7AC30FF52428AA8F0091C135 /* Models */,
 				7AC310022428AA8F0091C135 /* ModelsTests */,
 				7A2E2BF1246F0634000ADF7F /* PodlejCommon */,
-				7A2E2C04246F070D000ADF7F /* PodlejCommon */,
 				7A984FD423C0AB7700772684 /* Products */,
 				7A21743324278A0300A0AAD5 /* Frameworks */,
 			);
@@ -378,18 +373,10 @@
 				7A984FDA23C0AB7800772684 /* ContentView.swift */,
 				7A984FDC23C0AB7A00772684 /* Assets.xcassets */,
 				7A984FE123C0AB7A00772684 /* LaunchScreen.storyboard */,
+				7A5016832471BEF30054E705 /* Preview Content */,
 				7A984FE423C0AB7A00772684 /* Info.plist */,
-				7A984FDE23C0AB7A00772684 /* Preview Content */,
 			);
 			path = Podlej;
-			sourceTree = "<group>";
-		};
-		7A984FDE23C0AB7A00772684 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				7A984FDF23C0AB7A00772684 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		7A984FEC23C0AB7B00772684 /* PodlejTests */ = {
@@ -455,7 +442,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7A2E2C07246F070D000ADF7F /* PodlejCommon.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -756,8 +742,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A5016862471BF5A0054E705 /* Preview Assets.xcassets in Resources */,
 				7A984FE323C0AB7A00772684 /* LaunchScreen.storyboard in Resources */,
-				7A984FE023C0AB7A00772684 /* Preview Assets.xcassets in Resources */,
 				7A984FDD23C0AB7A00772684 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -969,6 +955,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 956U4TDY4Z;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -998,6 +985,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 956U4TDY4Z;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -1239,7 +1227,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Podlej/Podlej.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"Podlej/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "Podlej/Preview\\ Content/Preview\\ Assets.xcassets";
 				DEVELOPMENT_TEAM = 554248M85F;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Podlej/Info.plist;
@@ -1261,7 +1249,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Podlej/Podlej.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"Podlej/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "Podlej/Preview\\ Content/Preview\\ Assets.xcassets";
 				DEVELOPMENT_TEAM = 554248M85F;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Podlej/Info.plist;

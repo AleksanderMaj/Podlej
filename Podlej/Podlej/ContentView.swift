@@ -19,6 +19,7 @@ struct AppState: Equatable {
     var plants = [Plant]()
     var isPlantDetailsPresented = false
     var plantDetails = Plant(name: "Nowa roślina")
+    var selection: UUID? = nil
 }
 
 extension AppState {
@@ -27,13 +28,15 @@ extension AppState {
             .init(
                 plants: plants,
                 isPlantDetailsPresented: isPlantDetailsPresented,
-                plantDetails: plantDetails
+                plantDetails: plantDetails,
+                selection: selection
             )
         }
         set {
             self.plants = newValue.plants
             self.isPlantDetailsPresented = newValue.isPlantDetailsPresented
             self.plantDetails = newValue.plantDetails
+            self.selection = newValue.selection
         }
     }
 }
@@ -57,18 +60,25 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            PlantsView(
-                store: self.store.scope(
-                    state: { $0.plantsView },
-                    action: AppAction.plants
+            NavigationView {
+                PlantsView(
+                    store: self.store.scope(
+                        state: { $0.plantsView },
+                        action: AppAction.plants
+                    )
                 )
-            )
-                .tabItem {
-                    Image(systemName: "list.bullet")
-                        .font(Font.body.weight(.black))
-                    Text("Rośliny")
             }
-            Text("Kalendarz")
+            .tabItem {
+                Image(systemName: "list.bullet")
+                    .font(Font.body.weight(.black))
+                Text("Rośliny")
+            }
+            VStack {
+                Image("calathea")
+                    .resizable()
+                    .frame(width: 90, height: 90)
+                Text("Kalendarz")
+            }
                 .tabItem {
                     Image(systemName: "calendar")
                         .font(Font.body.weight(.black))
@@ -86,7 +96,15 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(
+            store: Store<AppState, AppAction>(
+                initialState: AppState(
+                    plants: .mock
+                ),
+                reducer: reducer,
+                environment: .mock
+            )
+        )
     }
 }
 
@@ -97,6 +115,14 @@ struct AppEnvironment {
 extension AppEnvironment {
     var plants: Plants.Environment {
         .init(cloudKitWrapper: cloudKitWrapper)
+    }
+}
+
+extension AppEnvironment {
+    static var mock: AppEnvironment {
+        AppEnvironment(
+            cloudKitWrapper: .mock
+        )
     }
 }
 

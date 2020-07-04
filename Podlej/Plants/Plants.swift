@@ -12,22 +12,24 @@ import CloudKit
 import Combine
 import Models
 import PlantDetails
-import CasePaths
 import PodlejCommon
 
 public struct State: Equatable {
     public var plants: [Plant]
     public var isPlantDetailsPresented: Bool
     public var plantDetails: Plant
+    public var selection: UUID?
 
     public init(
         plants: [Plant],
         isPlantDetailsPresented: Bool,
-        plantDetails: Plant
+        plantDetails: Plant,
+        selection: UUID?
     ) {
         self.plants = plants
         self.isPlantDetailsPresented = isPlantDetailsPresented
         self.plantDetails = plantDetails
+        self.selection = selection
     }
 }
 
@@ -36,12 +38,14 @@ extension State {
         get {
             ListState(
                 plants: self.plants,
-                isPlantDetailsPresented: self.isPlantDetailsPresented
+                isPlantDetailsPresented: self.isPlantDetailsPresented,
+                selection: self.selection
             )
         }
         set {
             plants = newValue.plants
             isPlantDetailsPresented = newValue.isPlantDetailsPresented
+            selection = newValue.selection
         }
     }
 
@@ -57,11 +61,27 @@ extension State {
             self.isPlantDetailsPresented = newValue.isPresented
         }
     }
+
+    var existingPlantDetails: PlantDetails.State? {
+        get {
+            guard let selectedPlant = plants.first(where: { selection == $0.uuid })
+                else { return nil }
+            return PlantDetails.State(
+                plant: selectedPlant,
+                isPresented: false
+            )
+        }
+        set {
+            guard let newValue = newValue else { return }
+            self.selection = newValue.plant.uuid
+        }
+    }
 }
 
 public struct ListState: Equatable {
     public var plants: [Plant]
     public var isPlantDetailsPresented: Bool
+    public var selection: UUID?
 }
 
 public enum Action: Equatable {
@@ -95,6 +115,7 @@ public enum ListAction: Equatable {
     case fetchPlants
     case fetchPlantsResponse(Result<[Plant], CloudKitWrapper.FetchError>)
     case plantDetails(PlantDetails.Action)
+    case setSelection(UUID?)
 }
 
 let listReducer = Reducer<ListState, ListAction, Environment> { state, action, environment in
@@ -122,6 +143,10 @@ let listReducer = Reducer<ListState, ListAction, Environment> { state, action, e
 
     case .plantDetails:
         return .none
+
+    case .setSelection(let uuid):
+        state.selection = uuid
+        return .none
     }
 }
 
@@ -142,6 +167,25 @@ public let reducer = Reducer.combine(
     }
 )
 
+public struct PlantView: View {
+    let plant: Plant
+
+    public var body: some View {
+        HStack {
+            Image("calathea")
+                .resizable()
+                .frame(width: 74, height: 74)
+                .clipShape(Circle())
+            VStack(alignment: .leading) {
+                Text(plant.name)
+                    .font(.body)
+                Text(plant.species ?? "")
+                    .font(.body)
+                    .foregroundColor(.gray)
+            }
+        }
+    }
+}
 
 public struct PlantsView: View {
 
@@ -153,30 +197,45 @@ public struct PlantsView: View {
     
     public var body: some View {
         WithViewStore(store) { viewStore in
-            NavigationView {
-                List {
-                    ForEach(
-                        viewStore.plants,
-                        id: \Plant.name,
-                        content: { plant in Text(plant.name) }
+            List {
+                ForEach(
+                    viewStore.plants,
+                    id: \Plant.uuid
+                ) { plant in
+                    NavigationLink(
+                        destination: IfLetStore(
+                            self.store.scope(state: { $0.existingPlantDetails }, action: Action.plantDetails),
+                            then: PlantDetailsView.init(store:)
+                        ),
+                        tag: plant.uuid,
+                        selection: viewStore.binding(
+                            get: { $0.selection },
+                            send: { Action.list(.setSelection($0)) }
+                        ),
+                        label: { PlantView(plant: plant) }
                     )
                 }
-                .navigationBarTitle("Rośliny")
-                .navigationBarItems(trailing:
-                    HStack {
-                        Button("Odśwież", action: { viewStore.send(.list(.fetchPlants)) })
-                        Button("Dodaj", action: { viewStore.send(.list(.addPlant)) })
-                    }
-                )
-                    .onAppear {
-                        viewStore.send(.list(.fetchPlants))
+            }
+            .navigationBarTitle("Rośliny")
+            .navigationBarItems(trailing:
+                HStack {
+                    Button("Odśwież", action: { viewStore.send(.list(.fetchPlants)) })
+                    Button("Dodaj", action: { viewStore.send(.list(.addPlant)) })
                 }
-                .sheet(
-                    isPresented: .constant(viewStore.isPlantDetailsPresented),
-                    onDismiss: { viewStore.send(.list(.plantDetailsDismissed)) }
-                ) {
+            )
+                .onAppear {
+                    viewStore.send(.list(.fetchPlants))
+            }
+            .sheet(
+                isPresented: .constant(viewStore.isPlantDetailsPresented),
+                onDismiss: { viewStore.send(.list(.plantDetailsDismissed)) }
+            ) {
+                NavigationView {
                     PlantDetailsView(
-                        store: self.store.scope(state: { $0.plantDetailsView }, action: Action.plantDetails)
+                        store: self.store.scope(
+                            state: { $0.plantDetailsView },
+                            action: Action.plantDetails
+                        )
                     )
                 }
             }
@@ -186,16 +245,19 @@ public struct PlantsView: View {
 
 struct Plants_Previews: PreviewProvider {
     static var previews: some View {
-        PlantsView(
-            store: .init(
-                initialState: .init(
-                    plants: .mock,
-                    isPlantDetailsPresented: false,
-                    plantDetails: .init(name: "Nowa roślina")
-                ),
-                reducer: reducer,
-                environment: .mock
+        NavigationView {
+            PlantsView(
+                store: .init(
+                    initialState: .init(
+                        plants: .mock,
+                        isPlantDetailsPresented: false,
+                        plantDetails: .init(name: "Nowa roślina"),
+                        selection: nil
+                    ),
+                    reducer: reducer,
+                    environment: .mock
+                )
             )
-        )
+        }
     }
 }
